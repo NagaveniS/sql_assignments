@@ -1,0 +1,40 @@
+1)
+select concat(ifnull(first_name,' '),' ',ifnull(middle_name,' '),' ',ifnull(last_name,' ')) as Full_Name,batches.name as batch_name,concat(group_concat(distinct subjects.name),',',elective_groups.name) as subject_name from students inner join batches on students.batch_id=batches.id left  join subjects on batches.id=subjects.batch_id left join elective_groups on subjects.batch_id=elective_groups.batch_id  where students.school_id=83 and batches.is_active=1 group by students.id;
+
+
+
+2) select students.id as student_id,count(subject_leaves.id) as subject_leaves from students left join subject_leaves on students.id=subject_leaves.student_id where students.school_id=83 group by students.id;
+
+3)
+ select students.id as student_id,dayname(month_date) as day,concat(employees.first_name,' ',employees.last_name) as  teachers_name  from students inner join subject_leaves on students.id=subject_leaves.student_id inner join subject_leaves_teachers on subject_leaves.id=subject_leaves_teachers.subject_leave_id inner join employees on subject_leaves_teachers.employee_id=employees.id where students.school_id=83 ;
+
+4)
+select students.id,concat(ifnull(first_name,' '),' ',ifnull(middle_name,' '),' ',ifnull(last_name,' ')) as Full_Name,sum(finance_fees.balance) as total_balance from students inner join finance_fees on students.id=finance_fees.student_id where ( concat(ifnull(first_name,' '),' ',ifnull(middle_name,' '),' ',ifnull(last_name,' '))   like '%aman%')  and finance_fees.school_id=83 and finance_fees.is_paid=0  group by finance_fees.student_id;
+
+5) select concat(ifnull(first_name,' '),' ',ifnull(middle_name,' '),' ',ifnull(last_name,' ')) as Full_Name  from students inner join finance_fees ff on students.id=ff.student_id inner join finance_fee_collections as ffc on ff.fee_collection_id=ffc.id inner join collection_discounts as cd on ffc.id=cd.finance_fee_collection_id inner join fee_discounts as fd on cd.fee_discount_id=fd.id  where students.school_id=83 and fd.is_deleted=0 group by students.id;
+
+
+6)
+select concat(ifnull(first_name,' '),' ',ifnull(middle_name,' '),' ',ifnull(last_name,' ')) as Full_Name from students inner join   finance_transactions on students.id=finance_transactions.payee_id where students.school_id=83 and finance_transactions.payment_mode="Online Payment" and payee_type='student' group by students.id ;
+
+7) select students.id,concat(first_name,' ',last_name) name ,Due_date,CURDATE(),book_id  from students  left join book_movements on students.user_id=book_movements.user_id where book_movements.school_id=83 and (status in('Issued','renewed') or Due_date < CURDATE()) ;
+
+ 
+
+8) select concat(ifnull(first_name,' '),' ',ifnull(middle_name,' '),' ',ifnull(last_name,' ')) as Full_name from employees inner join batch_tutors on employees.id=batch_tutors.employee_id left join employee_attendances on batch_tutors.employee_id=employee_attendances.employee_id  where employees.school_id=83  and (employees.id not in (select employee_attendances.employee_id from employee_attendances)) group by batch_tutors.employee_id;
+
+
+9)
+
+select students.id student_id,concat(first_name,' ',last_name) name,sum(balance) total_balance_amount, fines.name fine_name,sum(fine_days * fine_amount) total_fine_amount from students left join finance_fees on students.id=finance_fees.student_id left join finance_fee_collections on finance_fees.fee_collection_id=finance_fee_collections.id left join fines on finance_fee_collections.fine_id=fines.id left join fine_rules on fines.id=fine_rules.fine_id where students.school_id=83 and (is_paid=0 or is_fine_paid=0 ) and fines.is_deleted=0  group by students.id;
+
+
+select students.id student_id,concat(first_name,' ',last_name) name,sum(balance) total_balance_amount, fines.name fine_name,case when is_amount=1 then (sum(fine_days * fine_amount)) when is_amount=0 then (sum(((fine_amount/100)*balance)*fine_days)) end total_fine_amount from students inner join finance_fees on students.id=finance_fees.student_id inner join finance_fee_collections on finance_fees.fee_collection_id=finance_fee_collections.id inner join fines on finance_fee_collections.fine_id=fines.id inner join fine_rules on fines.id=fine_rules.fine_id where students.school_id=83 and (is_paid=0 or is_fine_paid=0 ) and fines.is_deleted=0  group by students.id;
+
+
+
+
+10) 
+
+select ff.student_id ,group_concat(distinct ffc.name SEPARATOR ',') as collections ,sum(ff.balance+ff.tax_amount+ff.particular_total +ffp.amount-fd.discount+fine_amount-ff.discount_amount) as total_fees,discount,case when fine_rules.is_amount=1 then (sum(fine_days * fine_amount)) when fine_rules.is_amount=0 then (sum(((fine_amount/100)*balance)*fine_days)) end total_fine_amount  from finance_fees as ff inner join finance_fee_collections as ffc on ff.fee_collection_id=ffc.id inner join collection_particulars as cp on ffc.id=cp.finance_fee_collection_id inner join finance_fee_particulars as ffp on cp.finance_fee_particular_id=ffp.id inner join collection_discounts as cd on ffc.id=cd.finance_fee_collection_id inner   join fee_discounts as fd on cd.fee_discount_id=fd.id inner join fines  on ffc.fine_id=fines.id inner join fine_rules on fines.id=fine_rules.fine_id where ff.student_id=3720 and ff.school_id=83 group by ff.student_id;
+

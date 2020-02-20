@@ -1,0 +1,14 @@
+1)select schools.name ,count(students.id) from schools left join  students on schools.id=students.school_id  where schools.is_deleted=0 group by schools.id;
+
+
+
+2)select students.first_name,students.id,group_concat(distinct finance_fee_collections.name order by finance_fee_collections.name asc separator ', ') from finance_fees right join finance_fee_collections on finance_fees.fee_collection_id=finance_fee_collections.id right join students on finance_fees.student_id=students.id inner join schools on students.school_id=schools.id where schools.id=6 and students.has_paid_fees=0 group by students.id order by students.id asc; 
+
+
+3)select concat(first_name,middle_name,last_name) as name,count(*) as total_absentees from schools inner join students on schools.id=students.school_id inner join attendances on students.id=attendances.student_id where schools.id=2 and (attendances.forenoon=0 or attendances.afternoon=0) group by students.id order by total_absentees desc;
+
+
+
+4) select  exams.school_id school_id,concat(first_name,' ',middle_name,' ',last_name) name , sum(exam_scores.marks) total_marks  from exams  inner join exam_scores on exams.id=exam_scores.exam_id  inner join students on exam_scores.student_id=students.id  where exam_group_id=7 group by students.id;
+
+5)select courses.id,course_name,group_concat(subjects.name order by subjects.name separator '  ') from schools inner join courses on schools.id=courses.school_id inner join batches on courses.id=batches.course_id inner join subjects on batches.id=subjects.batch_id where schools.id=1 group by subjects.batch_id;
